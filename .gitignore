@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.mcpb
+
+# Environment / secrets (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# OS / editor cruft
+.DS_Store
+
+# Test coverage
+coverage/

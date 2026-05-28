@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "harbor": {
+      "type": "stdio",
+      "command": "./bin/harbor-mcp.sh",
+      "args": [],
+      "env": {}
+    }
+  }
+}
