@@ -1,10 +1,10 @@
 {
-  "name": "harbor-mcp",
+  "name": "walrus-harbor-mcp",
   "version": "0.1.0",
   "description": "MCP server for Walrus Harbor — ggdrive-style decentralized, Seal-encrypted storage on Walrus + Sui",
   "type": "module",
   "bin": {
-    "harbor-mcp": "./bin/harbor-mcp.ts"
+    "walrus-harbor-mcp": "./bin/harbor-mcp.ts"
   },
   "scripts": {
     "dev": "tsx bin/harbor-mcp.ts",
