@@ -9,15 +9,26 @@
   "scripts": {
     "dev": "tsx bin/harbor-mcp.ts",
     "build": "tsup",
+    "build:mcpb": "tsup --config tsup.mcpb.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "prepare": "effect-language-service patch || true",
-    "mcpb:pack": "mcpb pack"
+    "mcpb:validate": "mcpb validate manifest.json",
+    "mcpb:pack": "pnpm build:mcpb && mcpb pack . walrus-harbor-mcp.mcpb"
   },
-  "keywords": ["mcp", "modelcontextprotocol", "walrus", "harbor", "sui", "seal", "decentralized-storage", "effect"],
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "walrus",
+    "harbor",
+    "sui",
+    "seal",
+    "decentralized-storage",
+    "effect"
+  ],
   "author": "Commandoss",
   "license": "MIT",
   "packageManager": "pnpm@10.33.2",

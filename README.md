@@ -134,8 +134,20 @@ If you prefer a global config, add this to your Claude Code config file (usually
 - Your `HARBOR_SERVICE_PRIVATE_KEY` **never leaves your machine**.
 - All Seal encryption/decryption and Sui transaction signing happens locally.
 - The server only talks to the Harbor API using your `hbr_` key.
+- **Path sandboxing via MCP roots.** `upload_file` (`localPath`) and `download_file` (`destPath`) are confined to the filesystem roots your MCP client advertises. If the client declares roots, a path outside every root is rejected; if the client doesn't support roots, the path is allowed and a notice is logged to stderr (enforce-when-present, fail-open-when-absent).
 
 This is why this MCP is designed as a **local stdio / MCPB** server rather than a remote one.
+
+## MCPB bundle (one-file distribution)
+
+The server can be packaged as a single `.mcpb` file for drag-and-drop install into Claude Desktop. The bundle inlines all dependencies (Seal/Sui are pure JS, no WASM), so it runs standalone with `node` — no `node_modules` needed.
+
+```bash
+pnpm mcpb:validate   # validate manifest.json against the v0.3 schema
+pnpm mcpb:pack       # build the self-contained bundle, then pack -> walrus-harbor-mcp.mcpb
+```
+
+On install, the client prompts for the `HARBOR_API_KEY` (required), `HARBOR_SERVICE_PRIVATE_KEY` (optional, sensitive), and an optional `HARBOR_API_BASE_URL` override, wired in via `user_config` in `manifest.json`.
 
 ## Development
 
@@ -147,10 +159,7 @@ pnpm dev          # runs the server with tsx
 
 ## Roadmap / Future Work
 
-- Full `delete_file` + `delete_bucket`
 - Team space member management tools
-- MCPB bundle for one-file distribution
-- Better local path sandboxing using MCP `roots`
 - Mainnet support when Harbor launches it
 
 ## License

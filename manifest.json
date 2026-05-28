@@ -1,0 +1,83 @@
+{
+  "manifest_version": "0.3",
+  "name": "walrus-harbor-mcp",
+  "display_name": "Walrus Harbor",
+  "version": "0.1.0",
+  "description": "MCP server for Walrus Harbor — ggdrive-style decentralized, Seal-encrypted storage on Walrus + Sui.",
+  "long_description": "Harbor is ggdrive-style decentralized storage. This bundle exposes tools to list spaces, manage Seal-encrypted buckets, and upload/download files. All Seal encryption/decryption and Sui signing happens locally using your service private key, which never leaves your machine.",
+  "author": {
+    "name": "Commandoss"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benhaq/walrus-harbor-mcp"
+  },
+  "homepage": "https://github.com/benhaq/walrus-harbor-mcp",
+  "license": "MIT",
+  "keywords": ["mcp", "walrus", "harbor", "sui", "seal", "decentralized-storage"],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/harbor-mcp.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/harbor-mcp.js"],
+      "env": {
+        "HARBOR_API_KEY": "${user_config.harbor_api_key}",
+        "HARBOR_SERVICE_PRIVATE_KEY": "${user_config.harbor_service_private_key}",
+        "HARBOR_API_BASE_URL": "${user_config.harbor_api_base_url}"
+      }
+    }
+  },
+  "user_config": {
+    "harbor_api_key": {
+      "type": "string",
+      "title": "Harbor API Key",
+      "description": "Your Harbor API key. Required for all Harbor API calls.",
+      "required": true,
+      "sensitive": true
+    },
+    "harbor_service_private_key": {
+      "type": "string",
+      "title": "Service Private Key",
+      "description": "Sui private key used locally for Seal encryption/decryption and signing. Never sent to any remote server. Required only for upload/download.",
+      "required": false,
+      "sensitive": true
+    },
+    "harbor_api_base_url": {
+      "type": "string",
+      "title": "Harbor API Base URL",
+      "description": "Override the Harbor API base URL (defaults to the public testnet endpoint).",
+      "required": false,
+      "default": "https://api.testnet.harbor.walrus.xyz"
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "tools": [
+    {
+      "name": "ping_harbor",
+      "description": "Check whether required Harbor credentials are present."
+    },
+    { "name": "list_spaces", "description": "List your Personal and Team spaces." },
+    { "name": "list_buckets", "description": "List buckets in a space." },
+    { "name": "create_bucket", "description": "Create a new Seal-encrypted bucket." },
+    {
+      "name": "upload_file",
+      "description": "Read a local file, encrypt it with Seal, and upload it."
+    },
+    { "name": "download_file", "description": "Download a file, decrypt it, and save it locally." },
+    { "name": "list_files", "description": "List files inside a specific bucket." },
+    {
+      "name": "get_file_status",
+      "description": "Check the processing state of an in-flight upload."
+    },
+    { "name": "get_bucket", "description": "Fetch a single bucket's metadata." },
+    { "name": "rename_bucket", "description": "Rename a bucket." },
+    { "name": "delete_bucket", "description": "Permanently delete a bucket and all its files." },
+    { "name": "delete_file", "description": "Permanently delete a single file from a bucket." }
+  ]
+}
