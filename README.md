@@ -11,7 +11,7 @@ Using a coding agent like **Claude Code**, **Codex**, **Cursor**, or **Gemini CL
 ````text
 Set up the walrus-harbor-mcp server in this repository for me. Do the following, in order, and stop to ask me if any step fails:
 
-1. Make sure we're in the harbor-mcp repo root (it contains package.json, bin/harbor-mcp.ts, and .mcp.json). If not, cd into it (clone it first if needed).
+1. Make sure we're in the harbor-mcp repo root (it contains package.json, bin/harbor-mcp.ts, and .mcp.json). If we're not already inside it, clone it from https://github.com/benhaq/walrus-harbor-mcp (`git clone https://github.com/benhaq/walrus-harbor-mcp.git`) and `cd` into the cloned folder.
 2. Run `pnpm install` (fall back to `npm install` if pnpm isn't available).
 3. If `.env` doesn't exist, run `cp .env.example .env`. Then ask me to paste my HARBOR_API_KEY (starts with `hbr_`) and HARBOR_SERVICE_PRIVATE_KEY (starts with `suiprivkey1`), and write them into `.env`. Never print my keys back to me or commit `.env` — it is git-ignored.
 4. Ensure the launcher scripts are executable: `chmod +x bin/*.sh`.
@@ -113,8 +113,8 @@ From a fresh clone on any machine:
 1. **Clone and install dependencies:**
 
    ```bash
-   git clone <repo-url>
-   cd harbor-mcp
+   git clone https://github.com/benhaq/walrus-harbor-mcp.git
+   cd walrus-harbor-mcp
    pnpm install
    ```
 
