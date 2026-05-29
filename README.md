@@ -9,17 +9,16 @@ This MCP server lets Claude manage files in your private, Seal-encrypted Walrus 
 Using a coding agent like **Claude Code**, **Codex**, **Cursor**, or **Gemini CLI**? Copy the block below verbatim into the agent and it will install, configure, and verify `walrus-harbor-mcp` for you. (Have your two Harbor keys ready — see [Get your Harbor credentials](#1-get-your-harbor-credentials).)
 
 ````text
-Set up the walrus-harbor-mcp server in this repository for me. Do the following, in order, and stop to ask me if any step fails:
+Set up the walrus-harbor-mcp MCP server for me by running these steps in order. Just run the commands — do NOT read or analyze the repo's files first. Stop and ask me only if a step actually fails.
 
-1. Make sure we're in the harbor-mcp repo root (it contains package.json, bin/harbor-mcp.ts, and .mcp.json). If we're not already inside it, clone it from https://github.com/benhaq/walrus-harbor-mcp (`git clone https://github.com/benhaq/walrus-harbor-mcp.git`) and `cd` into the cloned folder.
-2. Run `pnpm install` (fall back to `npm install` if pnpm isn't available).
-3. If `.env` doesn't exist, run `cp .env.example .env`. Then ask me to paste my HARBOR_API_KEY (starts with `hbr_`) and HARBOR_SERVICE_PRIVATE_KEY (starts with `suiprivkey1`), and write them into `.env`. Never print my keys back to me or commit `.env` — it is git-ignored.
-4. Ensure the launcher scripts are executable: `chmod +x bin/*.sh`.
-5. Confirm `.mcp.json` registers the server with the relative command `./bin/harbor-mcp.sh` (project-scoped, portable). If it's missing, create it.
-6. Run `./bin/verify-mcp.sh` and show me the output. A healthy run prints a JSON `initialize` result with `"serverInfo":{"name":"harbor-mcp"}`.
-7. Tell me to restart my agent / run `/mcp`, approve the project MCP server when prompted, then test with the `ping_harbor` and `list_spaces` tools.
+1. Clone and enter the repo: `git clone https://github.com/benhaq/walrus-harbor-mcp.git && cd walrus-harbor-mcp`
+2. Install dependencies: `pnpm install` (use `npm install` if pnpm isn't installed).
+3. Create the env file: `cp .env.example .env`. Then ask me for my HARBOR_API_KEY (starts with `hbr_`) and HARBOR_SERVICE_PRIVATE_KEY (starts with `suiprivkey1`) and write them into `.env`. Don't print my keys back to me.
+4. Make the launcher executable: `chmod +x bin/*.sh`.
+5. Verify it works: `./bin/verify-mcp.sh`. Success = the output contains `"serverInfo":{"name":"harbor-mcp"}`. The repo already includes a ready-to-use `.mcp.json` — don't create or edit it.
+6. Then tell me: restart the agent (or run `/mcp`), approve walrus-harbor-mcp when prompted, and test with the `ping_harbor` tool.
 
-Do NOT paste my private key anywhere except `.env`, and do NOT commit any secrets.
+Don't read other files, don't commit anything, and never put my keys anywhere except `.env`.
 ````
 
 That's it — once the agent finishes and you've approved the MCP server, you can talk to your Walrus storage in natural language. The rest of this README explains each step in detail if you'd rather do it manually.
