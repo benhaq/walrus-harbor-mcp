@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "harbor": {
+    "walrus-harbor-mcp": {
       "type": "stdio",
       "command": "./bin/harbor-mcp.sh",
       "args": [],
