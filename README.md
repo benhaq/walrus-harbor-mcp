@@ -15,10 +15,14 @@ Set up the walrus-harbor-mcp MCP server for me by running these steps in order. 
 2. Install dependencies: `pnpm install` (use `npm install` if pnpm isn't installed).
 3. Create the env file: `cp .env.example .env`. Then ask me for my HARBOR_API_KEY (starts with `hbr_`) and HARBOR_SERVICE_PRIVATE_KEY (starts with `suiprivkey1`) and write them into `.env`. Don't print my keys back to me.
 4. Make the launcher executable: `chmod +x bin/*.sh`.
-5. Verify it works: `./bin/verify-mcp.sh`. Success = the output contains `"serverInfo":{"name":"harbor-mcp"}`. The repo already includes a ready-to-use `.mcp.json` — don't create or edit it.
-6. Then tell me: restart the agent (or run `/mcp`), approve walrus-harbor-mcp when prompted, and test with the `ping_harbor` tool.
+5. Verify it works: `./bin/verify-mcp.sh`. Success = the output contains `"serverInfo":{"name":"harbor-mcp"}`.
+6. Register the server using its ABSOLUTE path — this matters. The repo intentionally ships **no** MCP config, because a relative path breaks the moment the repo is cloned as a subfolder of another project (it resolves against the wrong directory and fails with ENOENT). Register the absolute path instead, from inside the repo:
+   - If I'm using **Claude Code**: run `claude mcp add --scope user walrus-harbor-mcp -- "$(pwd)/bin/harbor-mcp.sh"`. (`--scope user` makes it available in every project, independent of which folder I open.)
+   - If I'm using **Codex**: run `codex mcp add walrus-harbor-mcp -- "$(pwd)/bin/harbor-mcp.sh"`.
+   - For **Cursor / Gemini CLI / Claude Desktop**: print the absolute path with `echo "$(pwd)/bin/harbor-mcp.sh"`, then add a stdio MCP server named `walrus-harbor-mcp` whose `command` is exactly that path in that tool's MCP config. Do NOT use a relative path.
+7. Then tell me: restart the agent (or run `/mcp`), approve walrus-harbor-mcp when prompted, and test with the `ping_harbor` tool.
 
-Don't read other files, don't commit anything, and never put my keys anywhere except `.env`.
+Don't read other files, don't commit anything, and never put my keys anywhere except `.env` (the launcher loads them from there automatically).
 ````
 
 That's it — once the agent finishes and you've approved the MCP server, you can talk to your Walrus storage in natural language. The rest of this README explains each step in detail if you'd rather do it manually.
@@ -103,9 +107,9 @@ HARBOR_API_KEY=... HARBOR_SERVICE_PRIVATE_KEY=... pnpm exec tsx bin/harbor-mcp.t
 
 ## Adding to Claude Code
 
-Claude Code (the agentic coding interface) supports project-scoped MCP servers, which is the cleanest way to use `harbor-mcp`. The setup below is **portable** — it works on any machine that clones the repo, with no machine-specific paths to edit.
+The repo intentionally ships **no** MCP config file. A committed config can only hold a *relative* command (`./bin/harbor-mcp.sh`), and that silently breaks the moment the repo is cloned as a subfolder of another project: Claude Code resolves a relative `command` against the directory it was launched from — not against the subfolder — so it looks in the wrong place and fails with `ENOENT`. Instead, each clone registers its own **absolute** path once. It's one command and works no matter where you cloned the repo or which folder you open Claude Code in.
 
-### Recommended Setup (Project-scoped, portable)
+### Setup
 
 From a fresh clone on any machine:
 
@@ -133,9 +137,15 @@ From a fresh clone on any machine:
    # if needed: chmod +x bin/*.sh && ./bin/verify-mcp.sh
    ```
 
-4. Restart Claude Code (or reload the window if using it inside VS Code / Cursor).
+4. **Register the server with its absolute path** (run from inside the repo so `$(pwd)` is correct):
 
-5. In Claude Code, run `/mcp`. You should see `walrus-harbor-mcp` listed. The first time, Claude Code asks you to **approve the project MCP server** — accept the trust prompt.
+   ```bash
+   claude mcp add --scope user walrus-harbor-mcp -- "$(pwd)/bin/harbor-mcp.sh"
+   ```
+
+   `--scope user` makes it available in every project, independent of which folder you open. Use `--scope local` if you'd rather scope it to the current project only. The launcher self-locates and loads `.env`, so no paths or keys go into the command.
+
+5. Restart Claude Code (or reload the window if using it inside VS Code / Cursor), then run `/mcp`. You should see `walrus-harbor-mcp` listed — **approve it** when prompted.
 
 6. Try these commands:
 
@@ -143,11 +153,19 @@ From a fresh clone on any machine:
    - `list_spaces`
    - `create_bucket` (with a space ID)
 
-**How it stays portable:** the project ships `.mcp.json` (the project-scoped config Claude Code reads) with a **relative** command `./bin/harbor-mcp.sh`, resolved from the repo root. The launcher itself finds its own location, so the repo works wherever you clone it. A matching `.claude/config.json` (also relative) is included for older Claude Code versions. **No absolute paths are baked in.**
+**About file paths in `upload_file` / `download_file`:** you don't have to live inside this repo to use them. Relative paths (and `~`) are resolved against **your current workspace**, not the harbor-mcp repo — so "upload `report.pdf`" and "download to `~/Downloads/x.pdf`" do what you'd expect from whatever project you're working in. Paths are still sandboxed to the filesystem roots your MCP client advertises (see [Security Model](#security-model)).
 
-### Manual / Global Config (alternative)
+### Other agents / manual config
 
-If you prefer a global config instead of the project-scoped one, add this to your Claude Code config file (usually `~/.claude/config.json` or `~/.config/claude/config.json`), replacing the path with the **absolute path to your own clone**:
+`claude mcp add` is Claude Code–specific, but the rule is the same for every agent: register a stdio MCP server named `walrus-harbor-mcp` whose `command` is the **absolute path to your own clone** — never a relative path. Print the exact value with `echo "$(pwd)/bin/harbor-mcp.sh"` from the repo root.
+
+**Codex** ships an equivalent command — run it from inside the repo:
+
+```bash
+codex mcp add walrus-harbor-mcp -- "$(pwd)/bin/harbor-mcp.sh"
+```
+
+**Cursor, Gemini CLI, Claude Desktop, or any hand-written config:** add the server with that absolute `command`. For example, in a Claude config file (usually `~/.claude.json`, `~/.claude/config.json`, or `~/.config/claude/config.json`):
 
 ```json
 {
@@ -167,7 +185,7 @@ If you prefer a global config instead of the project-scoped one, add this to you
 - Your `HARBOR_SERVICE_PRIVATE_KEY` **never leaves your machine**.
 - All Seal encryption/decryption and Sui transaction signing happens locally.
 - The server only talks to the Harbor API using your `hbr_` key.
-- **Path sandboxing via MCP roots.** `upload_file` (`localPath`) and `download_file` (`destPath`) are confined to the filesystem roots your MCP client advertises. If the client declares roots, a path outside every root is rejected; if the client doesn't support roots, the path is allowed and a notice is logged to stderr (enforce-when-present, fail-open-when-absent).
+- **Path sandboxing via MCP roots.** `upload_file` (`localPath`) and `download_file` (`destPath`) are confined to the filesystem roots your MCP client advertises. Relative paths (and a leading `~`) are resolved against your **workspace root** — the first root the client advertises — not the server's own directory, so they follow wherever you're working. If the client declares roots, a path that resolves outside every root is rejected; if the client doesn't support roots, the path is allowed and a notice is logged to stderr (enforce-when-present, fail-open-when-absent).
 
 This is why this MCP is designed as a **local stdio / MCPB** server rather than a remote one.
 
