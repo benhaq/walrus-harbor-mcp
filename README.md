@@ -1,8 +1,8 @@
 # harbor-mcp
 
-**ggdrive-style decentralized storage for Claude**, powered by [Walrus Harbor](https://testnet.harbor.walrus.xyz/).
+Manage [Walrus Harbor](https://testnet.harbor.walrus.xyz/) files directly from Claude.
 
-This MCP server lets Claude manage files in your private, Seal-encrypted Walrus buckets with the same natural language experience you’d expect from Google Drive — but fully decentralized and end-to-end encrypted.
+Create buckets, upload files, retrieve documents, and manage data stored on Walrus using natural language. Files remain encrypted client-side and under your control.
 
 ## Paste it to your agent and let it set it up for you
 
@@ -25,16 +25,16 @@ Set up the walrus-harbor-mcp MCP server for me by running these steps in order. 
 Don't read other files, don't commit anything, and never put my keys anywhere except `.env` (the launcher loads them from there automatically).
 ````
 
-That's it — once the agent finishes and you've approved the MCP server, you can talk to your Walrus storage in natural language. The rest of this README explains each step in detail if you'd rather do it manually.
+That's it — once the agent finishes and you've approved the MCP server, you can manage files in Walrus Harbor using natural language. The rest of this README explains each step in detail if you'd rather do it manually.
 
-## Features
+## What you can do
 
-- Create private Seal-encrypted buckets
-- Upload local files (automatically encrypted client-side)
-- Download & decrypt files to your machine
-- List spaces, buckets, and files
-- Full retry + polling logic for reliable uploads
-- All cryptographic operations (Seal + Sui signing) happen **locally** on your machine
+- Create private encrypted buckets
+- Store and retrieve files using natural language
+- Manage Harbor data without leaving Claude
+- Keep sensitive files private by default
+- Use Harbor as durable storage for apps, agents, and AI workflows
+
 
 ## Quick Start
 
@@ -182,12 +182,13 @@ codex mcp add walrus-harbor-mcp -- "$(pwd)/bin/harbor-mcp.sh"
 
 ## Security Model
 
-- Your `HARBOR_SERVICE_PRIVATE_KEY` **never leaves your machine**.
-- All Seal encryption/decryption and Sui transaction signing happens locally.
-- The server only talks to the Harbor API using your `hbr_` key.
-- **Path sandboxing via MCP roots.** `upload_file` (`localPath`) and `download_file` (`destPath`) are confined to the filesystem roots your MCP client advertises. Relative paths (and a leading `~`) are resolved against your **workspace root** — the first root the client advertises — not the server's own directory, so they follow wherever you're working. If the client declares roots, a path that resolves outside every root is rejected; if the client doesn't support roots, the path is allowed and a notice is logged to stderr (enforce-when-present, fail-open-when-absent).
-
-This is why this MCP is designed as a **local stdio / MCPB** server rather than a remote one.
+- Harbor never has access to your plaintext files or decryption keys. 
+- Harbor never has access to your plaintext files or decryption keys.
+- Your `HARBOR_SERVICE_PRIVATE_KEY` never leaves your machine
+- Encryption, decryption, and signing happen locally
+- The server only communicates with Harbor using your API key
+- File access is restricted to the directories exposed by your MCP client
+- Path sandboxing via MCP roots. upload_file (localPath) and download_file (destPath) are confined to the filesystem roots your MCP client advertises. Relative paths (and a leading ~) are resolved against your workspace root rather than the MCP server directory. Paths outside permitted roots are rejected when supported by the MCP client.
 
 ## MCPB bundle (one-file distribution)
 
@@ -219,4 +220,4 @@ MIT
 
 ## Acknowledgments
 
-Built on top of [Walrus Harbor](https://github.com/MystenLabs/harbor), [Walrus](https://walrus.xyz), and [Seal](https://github.com/MystenLabs/seal) by Mysten Labs.
+Built on [Walrus Harbor](https://github.com/MystenLabs/harbor), powered by [Walrus](https://github.com/MystenLabs/walrus) and [Seal](https://github.com/MystenLabs/seal).
