@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "walrus-harbor-mcp": {
-      "command": "./bin/harbor-mcp.sh",
-      "description": "Walrus Harbor decentralized storage (ggdrive-style with Seal encryption)"
-    }
-  }
-}

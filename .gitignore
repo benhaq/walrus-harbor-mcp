@@ -21,3 +21,9 @@ yarn-error.log*
 
 # Test coverage
 coverage/
+
+# Machine-specific MCP registration. Each clone registers its own ABSOLUTE path
+# via `claude mcp add` (see README) — these would bake in a local path, so they
+# must never be committed.
+.mcp.json
+.claude/

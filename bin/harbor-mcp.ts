@@ -7,7 +7,7 @@ import { getRawServiceKey, HarborConfigTag } from "../src/config.js";
 import { HarborApiClient } from "../src/harbor/HarborApiClient.js";
 import { HarborStorageService } from "../src/harbor/HarborStorageService.js";
 import { BucketId, FileId, SpaceId } from "../src/harbor/types.js";
-import { assertPathWithinRoots } from "../src/pathSandbox.js";
+import { resolvePathWithinRoots } from "../src/pathSandbox.js";
 import { AppRuntime, runPromise } from "../src/runtime.js";
 
 /**
@@ -196,14 +196,14 @@ server.registerTool(
       localPath: string;
       name?: string | undefined;
     }) => {
-      await assertPathWithinRoots(server.server, localPath, "Source");
+      const resolvedPath = await resolvePathWithinRoots(server.server, localPath, "Source");
       return await runPromise(
         Effect.gen(function* () {
           const storage = yield* HarborStorageService;
           return yield* storage.uploadFileToBucket(
             BucketId.make(bucketId),
             sealPolicyId,
-            localPath,
+            resolvedPath,
             name,
           );
         }),
@@ -238,7 +238,7 @@ server.registerTool(
       sealPolicyId: string;
       destPath: string;
     }) => {
-      await assertPathWithinRoots(server.server, destPath, "Destination");
+      const resolvedPath = await resolvePathWithinRoots(server.server, destPath, "Destination");
       return await runPromise(
         Effect.gen(function* () {
           const storage = yield* HarborStorageService;
@@ -246,7 +246,7 @@ server.registerTool(
             BucketId.make(bucketId),
             FileId.make(fileId),
             sealPolicyId,
-            destPath,
+            resolvedPath,
           );
         }),
       );
